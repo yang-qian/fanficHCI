@@ -1,0 +1,30 @@
+#d3-viz{
+    width: 80%;
+    position: absolute;
+    right: 0;
+    padding-top:50px;
+    line-height: 12px;
+  }
+
+# tooltip
+#d3-viz .tooltiptext{
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: -1px;
+	overflow: visible;
+	padding-top: 9px;
+	margin-top: -8px;
+}
+
+.marktext1 {
+	font-size: 15px;
+	text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
+}
+.marktext2 {
+	font-size: 15px;
+	text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
+}
+
+.marktext3, .marktext4, .marktext5 {
+	text-shadow: -1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff;
+}
