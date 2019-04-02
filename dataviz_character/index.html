@@ -31,7 +31,7 @@ var svg = d3.select("#d3-viz")
         "translate(" + margin.left + "," + margin.top + ")");
 
 //Read the data
-d3.csv("data/relationship_tsne_embed.csv", function(data) {
+d3.csv("data/relationship_tsne_embed_wAuthor.csv", function(data) {
 
     // Add X axis
     var mind1 = d3.min(data, function(d) { return d.d1; });
@@ -86,7 +86,8 @@ d3.csv("data/relationship_tsne_embed.csv", function(data) {
         .style("width", "300px")
 
     // When the user hovers over a point,
-    // this function highlights the characters from the same fic
+    // Highlights the characters from the same fic
+    // and show tooltip
     var highlight = function(d){
         selected_fic = d.fic_id
         console.log(selected_fic, typeof selected_fic)
