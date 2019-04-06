@@ -1,15 +1,14 @@
 # fanficHCI
 
-This repo analyzes the [AO3](http://archiveofourown.org) fanfiction corpus.
+This repo analyzes an [AO3](http://archiveofourown.org) fanfiction corpus.
 
 ### Usage
 
 * ```ao3_fandom_ranker.ipynb```
     * ranks the fandoms (across AO3 categories e.g., movie, book, anime) by popularity (in terms of the number of fanfics)
-* ```author_scraper.ipynb```
-    * takes in stories of a fandom ```sampledata/ao3_harrypotter_text_stories.csv```
-    * outputs a list of authors and a list of their pseudonyms ```sampleoutput/sampleoutput_authors.csv``` and ```sampleoutput/sampleoutput_authors.csv```
-
+* ```find_author_of_stories.py```
+    * takes in fanfic stories ```ao3_harrypotter/text_stories.csv```
+    * profiles the authors and their pseudonyms ```stories_authors.csv ``` and ```stories_pseudos.csv```
 
 * FOLDER ```dataviz_character```
     * visualizes ```relationship_tsne_embed.csv``` with d3.js
