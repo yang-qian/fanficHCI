@@ -69,11 +69,8 @@ def get_authors_from_storiescsv(path_to_stories):
     param: path to stories.csv
     return: df, columns are fic_id (lists) and author_key(str)
     '''
-    df = pd.read_csv(path_to_stories,usecols = ['fic_id','author_key'])
-    print('total number of stories: ', len(df))
-    dfdup = df.drop_duplicates()
-    print('duplicates removed:', len(dfdup))
-    return dfdup.groupby('author_key')['fic_id'].apply(list) # Series
+    df = pd.read_csv(path_to_stories, usecols = ['fic_id','author_key'])
+    return df.groupby('author_key')['fic_id'].apply(list) # Series
 
 #%%
 def find_author_of_ficid(fic_id):
@@ -127,7 +124,7 @@ def find_bookmark_work_counts(soup, url):
     return bookmark_cnt, work_cnt
 
 # In[14]:
-def profile_an_author(author_key,fic_author_lookup,
+def profile_an_author(author_key, fic_author_lookup,
                      authorschema = authorschema,
                      pseudoschema = pseudoschema,
                      sns_kw = sns_kw):
@@ -137,24 +134,24 @@ def profile_an_author(author_key,fic_author_lookup,
     return: df of the author, linked_social_media left as None
     each row is an author identity (author_key and psudo pair)
     '''
-    
-    author = pd.DataFrame(columns= authorschema)
-    pseudodf = pd.DataFrame(columns= pseudoschema)
+
+    author = pd.DataFrame(columns = authorschema)
+    pseudodf = pd.DataFrame(columns = pseudoschema)
     
     # ==== profile the author ==== #
     # get start_date, location
     r1 = requests.get("https://archiveofourown.org/users/" + author_key + "/profile",
                       headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'})
     soup1 = BeautifulSoup(r1.content, "html.parser")
-    
+
     try:
         # if the author_key exists
         umeta = [dd.text for dd in soup1.find("dl", class_="meta").findAll("dd")]
         # print('Found author %s.'%author_key)
     except:
         logger.info('Cannot find author %s' % author_key)
-        return None, None
-    
+        return author, pseudodf
+
     start_date = umeta[1]
     try:
         location = umeta[2]
@@ -163,7 +160,7 @@ def profile_an_author(author_key,fic_author_lookup,
         
     # get all pseudos of the author_key
     pseudos = [i['href'].split('/')[-1].encode('utf-8') for i in soup1.find("dd", class_ = "pseuds").findAll("a")]
-    
+
     # find the author's bio, if any
     biosoup = soup1.find("div", class_="bio module")
     if biosoup is not None:
@@ -182,7 +179,7 @@ def profile_an_author(author_key,fic_author_lookup,
         bday = soup1.find("dd", class_="birthday").text
     except:
         bday = ""
-    
+
     author_bookmark_cnt, author_work_cnt = find_bookmark_work_counts(soup1, "/users/" + author_key)
     author_fic_ids = fic_author_lookup[author_key]
     author = author.append({'author_key': author_key.encode('utf-8'),
@@ -229,7 +226,6 @@ def profile_an_author(author_key,fic_author_lookup,
                                     'pd_bookmark_count': pd_bookmark_cnt,
                                     'pd_fic_ids': pd_fic_ids},
                                      ignore_index = True)
-
     return author, pseudodf
 
 
@@ -246,22 +242,23 @@ def get_authors_from_stories(path_to_stories, start_at_author, limit, author_fou
     for author_key in author_key_list[start_at_author:]:
     # for author_key in ['2GirlsInLov']: # for debuggin
         print(author_key, cnt, limit)
+        author_key = str(author_key)
+        
         if cnt >= limit:
             break
+
+        cnt += 1
 
         # TO-DO: skip the author_keys in blacklisted_accounts
         if author_key in blacklisted_accounts:
             print("Skip %s for it's blacklisted." % author_key)
         else:
             author, pseudo = profile_an_author(author_key,fic_author_lookup)
-            if author is not None:
+            if len(author) > 0:
                 author.to_csv(author_fout, mode='a+', index=False, header = False, encoding = 'utf-8')
-            if pseudo is not None:
+            if len(pseudo) > 0:
                 pseudo.to_csv(pseudo_fout, mode='a+', index=False, header = False, encoding = 'utf-8')
-            # authors = authors.append(author)
-            # pseudos = pseudos.append(pseudo)
-            cnt += 1
-
+        
     logger.info('Done.\n *** \n')
     print("Done.")
 
@@ -274,9 +271,7 @@ if __name__== "__main__":
     parser.add_argument('-start', '--authorstartindex', required = False, default = 0, dest = 'author_start', type=int, help="Start looking for authors at this index number" )
     parser.add_argument('-limit', '--authorstopindex', required = False, default = np.inf, dest = 'author_limit', type=int, help="Stop looking for authors at this index number" )
     parser.add_argument('-test', '--localtestorserverrun', required = False, default = False, dest = 'test', type=bool, help="Local test (true) or server run (false)" )
-    args = parser.parse_args()  
-    print(args)
-    print(args.author_start)
+    args = parser.parse_args()
 
     if args.test == True:
         fin_root = 'sampledata/'
@@ -303,6 +298,8 @@ if __name__== "__main__":
 
     # get a list of authors
     fic_author_lookup = get_authors_from_storiescsv(path_to_stories) # Series
+    # print(len(fic_author_lookup)) # 38491
+    # print(len(fic_author_lookup.index.map(lambda x: x.lower()).drop_duplicates())) # 38491
     author_key_list = list(fic_author_lookup.index)
     # fic_author_lookup.to_pickle(authorlist_fout)
 
